@@ -58,7 +58,7 @@ module TestMod; // module to test multiplexer
    initial begin
       $display("Time\ts\td\to");
       $display("-----------------------------");
-      $monitor("%02d\t%b\t%b\t%b", $time, s, d, o);
+      $monitor("%2d\t%b\t%b\t%b", $time, s, d, o);
    end
 
    initial begin
