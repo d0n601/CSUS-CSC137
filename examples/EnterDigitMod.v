@@ -1,29 +1,30 @@
-// EnterDigit.v
-// enter a single decimal digit 0 ~ 9, one at a time
+// EnterDigitMod.v
+// enter a two decimal digit 00 ~ 31, return the same thing....
 // to compile: ~changw/ivl/bin/iverilog EnterDigit.v
+// to run: a.out
 
-
-module EnterDigit;
+module EnterDigits;
 // stdin is given by default, console input (keyboard)
    parameter STDIN = 32'h8000_0000; // 32 bit number 0x80000000
 
-   reg [7:0] x, newline;
+   reg [7:0] str[1:3];  // typing in 2 chars at a time (decimal # and Enter Key)
+   reg[4:0] d1, d2, sum; // 5-bit X, Y to sum
    
-   always begin // enter 0~9 in loop until entering other
-      #1;       // always-loop requires time/event condition
+   initial begin
 
-      $display("Enter a single decimal digit, others to end:");
+      $display("Enter Two Digit Number (00~31):");
 
-      x = $fgetc( STDIN );      // get ASCII order/value
-      x = x - 48;               // convert to its meant value (0~9)
+      d1 = $fgetc( STDIN );      // get first character.  
+      d2 = $fgetc( STDIN );      // get second character.
 
-      $display("Got x: %d", x); // show its decimal value
+      d1 = d1 - 48;               // convert ASCII representation to integer.
+      d2 = d2 - 48;               // convert ASCII representation to integer.
 
-      if( x > 9 ) begin         // not a digit entered
-         $display("You no fun. Bye, bye!");
-         $finish;
-      end
+      d1 = d1 * 10;
+      sum = d1 + d2;
 
-      newline = $fgetc( STDIN );    // get newline, discard
-   end
+      $display("Got: %d", sum); // show its decimal value
+
+   
+    end
 endmodule
