@@ -1,8 +1,13 @@
 //Ryan Kozak
-//CSC 137 
-//
-// LAB 3 SKELETON CODE
-//
+//CSC 137 Class #32509 
+//3rd Programming Assignment
+// 
+// 3Adder.v, 5-bit adder
+// compile: ~changw/ivl/bin/iverilog 3Adder.v
+// run: ./a.out
+
+
+
 module TesttMod;                     // the "main" thing
    parameter STDIN = 32'h8000_0000; // I/O address of keyboard input channel
 
@@ -11,7 +16,8 @@ module TesttMod;                     // the "main" thing
    wire [4:0] S;        // 5-bit Sum to see as result
    wire C5;             // like to know this as well from result of Adder
 
-   instantiate the big adder module (giving X and Y as input, getting S and C5 as output)
+   // instantiate the big adder module (giving X and Y as input, getting S and C5 as output)
+   BigAdder(X, Y, S, C5);
 
    initial begin
       prompt for entering X: $display("Enter X: ");
