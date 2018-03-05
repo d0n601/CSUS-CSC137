@@ -6,7 +6,7 @@
 // compile: ~changw/ivl/bin/iverilog Adder.v
 // run: ./a.out
 
-`include "fa.v" // This is the stuff from the second assignment that's included in this one.
+//`include "fa.v" I was importing all the stuff from lab 2, but, didn't know if was ok to do that. 
 
 module TestMod;                     // the "main" thing
    parameter STDIN = 32'h8000_0000; // I/O address of keyboard input channel
@@ -21,7 +21,7 @@ module TestMod;                     // the "main" thing
 
    initial begin
 
-      $display("Enter X:");
+      $display("Enter X (two digit 00~15 (since max is 01111):");
       str[1] = $fgetc( STDIN );      // get first character.  
       str[2] = $fgetc( STDIN );      // get second character.
       str[3] = $fgetc( STDIN );      // get enter key
@@ -30,7 +30,7 @@ module TestMod;                     // the "main" thing
       str[1] = str[1] * 10;          // multiply digit in tens place by ten.
       X = str[1] + str[2];           // add tens place and ones place for decimal value of X.
 
-      $display("Enter Y:");
+      $display("Enter Y (two digit 00~15 (since max is 01111):");
       str[1] = $fgetc( STDIN );      // get first character.  
       str[2] = $fgetc( STDIN );      // get second character.
       str[3] = $fgetc( STDIN );      // get enter key
@@ -41,8 +41,8 @@ module TestMod;                     // the "main" thing
 
       #1; // wait until Adder gets them processed
 
-      $display("X = %d (%b) \t Y = %d (%b)", X, X, Y, Y); // X and Y:
-      $display("Result = %d (%b) C5 = %b", S, S, C5); // S and C5
+      $display("X =%d (%b)  Y =%d (%b)", X, X, Y, Y); // X and Y:
+      $display("Result =%d (%b) C5 = %b", S, S, C5); // S and C5
 
    end
 endmodule
@@ -62,3 +62,45 @@ module BigAdder(X, Y, S, C5); // 5-Bit Adder, chaining 5 sigle bit adders togeth
    FullAdder fa5(X[4], Y[4], c[4] ,C5 ,S[4]);  // get an instance of the fifth adder , carry in bit from fourth.
 
 endmodule
+
+module MajorityModule(x, y, c_in, c_out); //Majority Module Definition (carry out)
+
+   input x, y, c_in; // inputs
+   output c_out; // carry out (out put)
+
+   wire [0:2] a_wire; // array of extra wires
+
+   and(a_wire[0], x, y); // first and gate
+   and(a_wire[1], x, c_in); // second and gate
+   and(a_wire[2], y, c_in); // third and gate 
+
+   or(c_out, a_wire[0], a_wire[1], a_wire[2]); // or gate to output
+
+endmodule
+
+
+
+module ParityModule(x, y, c_in, sum); // Parity Module Definition
+
+   input x, y, c_in; // inputs
+   output sum; // sum (out put)
+
+   wire x_y; // extra wire
+
+   xor(x_y, x, y); // first xor gate
+
+   xor(sum, x_y, c_in); // second xor gate
+
+endmodule
+
+
+module FullAdder(x, y, c_in, c_out, sum); // Full Adder (FA)
+
+   input x, y, c_in; // inputs
+   output c_out, sum; // outputs
+
+   MajorityModule my_mm (x, y, c_in, c_out); // declare majority module
+   ParityModule my_pm (x, y, c_in, sum); // declare partiy module
+endmodule
+
+
