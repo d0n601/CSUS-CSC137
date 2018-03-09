@@ -1,6 +1,6 @@
-//Ryan Kozak
-//CSC 137 Class #32509 
-//4th Programming Assignment
+// Ryan Kozak
+// CSC 137 Class #32509 
+// 4th Programming Assignment
 // AddSub.v
 //
 // compile: ~changw/ivl/bin/iverilog AddSub.v
@@ -8,16 +8,17 @@
 
 
 module TestMod;                     // the "main" thing
+   
    parameter STDIN = 32'h8000_0000; // I/O address of keyboard input channel
 
    reg C0;
    reg [7:0] str [1:3]; // typing in 2 chars at a time (decimal # and Enter key)
    reg [4:0] X, Y;      // 5-bit X, Y to sum
    wire [4:0] S;        // 5-bit Sum to see as result
-   wire C5, E;      // like to know this as well from result of Adder
+   wire C4, C5, E;      // like to know this as well from result of Adder
 
    // instantiate the big adder module (giving X and Y as input, getting S and C5 as output)
-   AddSubMod  my_addsub(X, Y, S, C0, C5, E);
+   AddSubMod  my_addsub(X, Y, S, C0, C4, C5, E);
 
    initial begin
 
@@ -41,31 +42,33 @@ module TestMod;                     // the "main" thing
 
       $display("Enter either '+' or '-':");
       str[1] = $fgetc( STDIN );      // get desired operation character
-      C0 = 0; // default to add
-      //if(str[1] < 45)   // set subtraction if user specified
-       //   C0 = 1;
-      //end 
-       
+
+      C0 = 0;// THIS NEEDS TO CHANGE FOR SUBTRACTION TO WORK!
+
+      
       #1; // wait until Adder gets them processed
 
-      $display("X = %d (%b) \t Y = %d (%b) C0=%d", X, X, Y, Y, C0); // X and Y:
-      $display("Result = %d (%b) C5 = %b", S, S, C5); // S and C5
+      $display("X=%b (%d) Y=%b (%d) C0=%d", X, X, Y, Y, C0); // X and Y:
+      $display("Result=%b (as unsigned %d) ", S, S); // S
+      $display("C4=%d C5=%d E=%d", C4, C5, E);
       
 
    end
 endmodule
 
 
-module AddSubMod(X, Y, S, C0, C5, E); // 5-Bit Adder/Subtractor
+module AddSubMod(X, Y, S, C0, C4, C5, E); // 5-Bit Adder/Subtractor
 
    input C0;
    input [4:0] X, Y ;   // two 5-bit input items
    output [4:0] S;     // S should be similar
-   output E, C5;          // another output
+   output E, C4, C5;   // another output
    wire [0:5] c;       // declare temporary wires
    wire [0:4] xw;      // declare temporary wires off xor gates
 
    assign c[0] = C0;
+   assign C4 = c[4];
+   assign C5 = c[5];
 
    xor(xw[0], c[0], Y[0]); // First xor gate
    xor(xw[1], c[0], Y[1]); // Second xor gate
@@ -76,10 +79,10 @@ module AddSubMod(X, Y, S, C0, C5, E); // 5-Bit Adder/Subtractor
    FullAdder fa1(X[0], xw[0], c[0], c[1], S[0]);  // get an instance of first adder, C0 is just hardcoded as 0
    FullAdder fa2(X[1], xw[1], c[1] ,c[2] ,S[1]); // get an instance of the second adder, carry in bit from first.
    FullAdder fa3(X[2], xw[2], c[2] ,c[3] ,S[2]); // get an instance of the third adder, carry in bit from second.
-   FullAdder fa4(X[3], xw[3], c[3] ,c[4] ,S[3]); // get an instance of the fourth adder, carry in bit from third.
-   FullAdder fa5(X[4], xw[4], c[4] ,C5 ,S[4]);  // get an instance of the fifth adder , carry in bit from fourth.
+   FullAdder fa4(X[3], xw[3], c[3], c[4] ,S[3]); // get an instance of the fourth adder, carry in bit from third.
+   FullAdder fa5(X[4], xw[4], c[4], c[5] ,S[4]);  // get an instance of the fifth adder , carry in bit from fourth.
 
-  xor(E, c[5], c[4]); // Final xor output gate 
+   xor(E, c[4], c[5]); // Final xor output gate 
 
 endmodule
 
@@ -91,7 +94,7 @@ module MajorityModule(x, y, c_in, c_out); //Majority Module Definition (carry ou
    wire [0:2] a_wire; // array of extra wires
 
    and(a_wire[0], x, y); // first and gate
-   and(a_wire[1], x, c_in); // second and gate
+   and(a_wire[1], x, c_in); // secoind and gate
    and(a_wire[2], y, c_in); // third and gate 
 
    or(c_out, a_wire[0], a_wire[1], a_wire[2]); // or gate to output
