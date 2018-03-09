@@ -11,13 +11,13 @@ module TestMod;                     // the "main" thing
    
    parameter STDIN = 32'h8000_0000; // I/O address of keyboard input channel
 
-   reg C0;
+   reg C0;              // 1 or 0 depending on user input
    reg [7:0] str [1:3]; // typing in 2 chars at a time (decimal # and Enter key)
    reg [4:0] X, Y;      // 5-bit X, Y to sum
    wire [4:0] S;        // 5-bit Sum to see as result
-   wire C4, C5, E;      // like to know this as well from result of Adder
+   wire C4, C5, E;      // like to know this as well from result of Add/Sub Mod.
 
-   // instantiate the big adder module (giving X and Y as input, getting S and C5 as output)
+   // instantiate the 5-bit addition/subtraction  module.
    AddSubMod  my_addsub(X, Y, S, C0, C4, C5, E);
 
    initial begin
@@ -43,32 +43,37 @@ module TestMod;                     // the "main" thing
       $display("Enter either '+' or '-':");
       str[1] = $fgetc( STDIN );      // get desired operation character
 
-      C0 = 0;// THIS NEEDS TO CHANGE FOR SUBTRACTION TO WORK!
-
+      if( str[1] == 45 ) // Subtract numbers
+          C0 = 1;
+      else // Add Numbers
+          C0 = 0; 
       
       #1; // wait until Adder gets them processed
 
-      $display("X=%b (%d) Y=%b (%d) C0=%d", X, X, Y, Y, C0); // X and Y:
-      $display("Result=%b (as unsigned %d) ", S, S); // S
+      $display("X=%b (%d) Y=%b (%d) C0=%d", X, X, Y, Y, C0);
+      $display("Result=%b (as unsigned %d) ", S, S);
       $display("C4=%d C5=%d E=%d", C4, C5, E);
-      
-
+      if(E==0)
+        $display("Since E is %d, C5 is not needed.", E);      
+      else 
+        $display("Since E is %d, correct with C5 in front: %d%b", E, C5, S);
    end
+
 endmodule
 
 
 module AddSubMod(X, Y, S, C0, C4, C5, E); // 5-Bit Adder/Subtractor
 
-   input C0;
+   input C0;            // 0 for add, 1 for subtract
    input [4:0] X, Y ;   // two 5-bit input items
    output [4:0] S;     // S should be similar
    output E, C4, C5;   // another output
    wire [0:5] c;       // declare temporary wires
    wire [0:4] xw;      // declare temporary wires off xor gates
 
-   assign c[0] = C0;
-   assign C4 = c[4];
-   assign C5 = c[5];
+   assign c[0] = C0;   // assign desired operation bit to input
+   assign C4 = c[4];   // assign output to output wire of fourth full adder
+   assign C5 = c[5];   // assign output to output wire of fifth full adder
 
    xor(xw[0], c[0], Y[0]); // First xor gate
    xor(xw[1], c[0], Y[1]); // Second xor gate
@@ -124,5 +129,6 @@ module FullAdder(x, y, c_in, c_out, sum); // Full Adder (FA)
 
    MajorityModule my_mm (x, y, c_in, c_out); // declare majority module
    ParityModule my_pm (x, y, c_in, sum); // declare partiy module
-   endmodule
+
+endmodule
 
