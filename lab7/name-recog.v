@@ -9,7 +9,6 @@
 // run: ./a.out 
 
 module TestMod;
-
    parameter STDIN = 32'h8000_0000; // keyboard-input file-handle address
 
    reg clk;
@@ -20,7 +19,7 @@ module TestMod;
    RecognizerMod my_recognizer(clk, ascii, match);
 
    initial begin
-      $display("Enter the the magic sequence: eg(Ryan )");
+      $display("Enter the 1st 5 letters in your fullname (e.g., 'Ryan '): ");
       str[1] = $fgetc(STDIN);  // 1st letter R
       str[2] = $fgetc(STDIN); // 2nd letter  y
       str[3] = $fgetc(STDIN); // 3rd letter  a
@@ -43,13 +42,9 @@ module TestMod;
       ascii = str[5];
       #1 clk = 1; #1 clk = 0;
   end
-
 endmodule
 
-
-
 module RecognizerMod(clk, ascii, match);
-
    input clk;
    input [6:0] ascii;
    output match;
@@ -100,7 +95,6 @@ module RecognizerMod(clk, ascii, match);
    and(submatch[0], invQ04, Q[0][3], Q[0][2], invQ01, invQ00);
   
    and(match, submatch[6], submatch[5], submatch[4], submatch[3], submatch[2], submatch[1], submatch[0]);
-
 endmodule
 
 module RippleMod(clk, ascii_bit, q);
